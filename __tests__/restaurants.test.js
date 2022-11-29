@@ -119,7 +119,7 @@ describe('restaurants routes', () => {
 
     const resp = await agent
       .post('/api/v1/restaurants/1/reviews')
-      .send({ detail: 'Dang, this is a nice place! 🌟⭐🌟⭐🌟' });
+      .send({ stars: 5, detail: 'Dang, this is a nice place! 🌟⭐🌟⭐🌟' });
 
     expect(resp.status).toBe(200);
     expect(resp.body).toMatchInlineSnapshot(`
@@ -127,7 +127,7 @@ describe('restaurants routes', () => {
         "detail": "Dang, this is a nice place! 🌟⭐🌟⭐🌟",
         "id": "4",
         "restaurant_id": "4",
-        "stars": null,
+        "stars": 5,
         "user_id": "1",
       }
     `);
