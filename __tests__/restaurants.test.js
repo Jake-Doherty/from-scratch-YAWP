@@ -3,6 +3,32 @@ const setup = require('../data/setup');
 const request = require('supertest');
 const app = require('../lib/app');
 
+const UserService = require('../lib/services/UserService');
+
+// Dummy user for testing
+const mockUser = {
+  firstName: 'Test',
+  lastName: 'User',
+  email: 'test@example.com',
+  password: '12345',
+};
+
+const registerAndLogin = async (userProps = {}) => {
+  const password = userProps.password ?? mockUser.password;
+
+  // Create an "agent" that gives us the ability
+  // to store cookies between requests in a test
+  const agent = request.agent(app);
+
+  // Create a user to sign in with
+  const user = await UserService.create({ ...mockUser, ...userProps });
+
+  // ...then sign in
+  const { email } = user;
+  await agent.post('/api/v1/users/sessions').send({ email, password });
+  return [agent, user];
+};
+
 describe('restaurants routes', () => {
   beforeEach(() => {
     return setup(pool);
@@ -84,6 +110,25 @@ describe('restaurants routes', () => {
           },
         ],
         "website": "http://www.PipsOriginal.com",
+      }
+    `);
+  });
+
+  it('POST /api/v1/restaurants/1/reviews should add a review to the db for the given restaurant by id', async () => {
+    const [agent] = await registerAndLogin();
+
+    const resp = await agent
+      .post('/api/v1/restaurants/1/reviews')
+      .send({ detail: 'Dang, this is a nice place! 🌟⭐🌟⭐🌟' });
+
+    expect(resp.status).toBe(200);
+    expect(resp.body).toMatchInlineSnapshot(`
+      Object {
+        "detail": "Dang, this is a nice place! 🌟⭐🌟⭐🌟",
+        "id": "4",
+        "restaurant_id": "4",
+        "stars": null,
+        "user_id": "1",
       }
     `);
   });
