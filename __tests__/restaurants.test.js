@@ -132,6 +132,21 @@ describe('restaurants routes', () => {
       }
     `);
   });
+
+  it(`DELETE /api/v1/reviews/4 
+      should delete review with id 4 on restaurant detail 
+      if user is owner of review or admin
+      `, async () => {
+    const [agent] = await registerAndLogin();
+
+    await agent
+      .post('/api/v1/restaurants/4/reviews')
+      .send({ stars: 5, detail: 'Dang, this is a nice place! 🌟⭐🌟⭐🌟' });
+
+    const resp = await agent.delete('/api/v1/reviews/4');
+
+    expect(resp.status).toBe(204);
+  });
   afterAll(() => {
     pool.end();
   });
